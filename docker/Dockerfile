@@ -9,10 +9,17 @@ ENV TORCH_CUDA_ARCH_LIST="6.0 6.1 7.0+PTX"
 ENV TORCH_NVCC_FLAGS="-Xfatbin -compress-all"
 ENV CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"
 
+RUN rm /etc/apt/sources.list.d/cuda.list
+RUN rm /etc/apt/sources.list.d/nvidia-ml.list
+RUN apt-key del 7fa2af80
+RUN apt-get update && apt-get install -y --no-install-recommends wget
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-keyring_1.0-1_all.deb
+RUN dpkg -i cuda-keyring_1.0-1_all.deb
+
 RUN apt-get update && apt-get install -y git ninja-build libglib2.0-0 libsm6 libxrender-dev libxext6 ffmpeg wget\
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
-
+ 
 RUN conda clean --all
 
 # Install MMCV
@@ -31,7 +38,7 @@ RUN pip install matplotlib numpy pandas sklearn
 RUN pip install ipython==7.23.1
 RUN pip install jinja2==3.0.3 jupyter_http_over_ws ipykernel==5.1.1 nbformat==4.4.0 jedi==0.17.2
 RUN pip install jupyter
-RUN pip install jupyterlab
+RUN pip install jupyterlab PyPDF2
 RUN pip install traitlets==5.0
 RUN pip install --no-cache-dir -e .
 RUN jupyter serverextension enable --py jupyter_http_over_ws
